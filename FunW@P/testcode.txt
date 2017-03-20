@@ -1,0 +1,26 @@
+fun somma (int int1, int int2) int {
+	var prova1 int = int1;
+	var prova6 int = int2;
+	return prova1 + prova6;
+}
+fun somma2 (int prova1) fun(int) int {
+	var prova7 int = prova1;
+	return fun(int prova2) int {
+                return prova7 + prova2;
+        };
+}
+fun main() { 
+	var prova1 int = 1;
+	var prova6 int = 4;
+	var i int = 0;
+	var provafun fun = somma2(prova1);
+	var provaz int;
+	prova1 = prova1 + (-1) * (-4);
+	println(prova1);
+	prova1 = 1;
+	if(prova1 == 1) then {
+		prova6 = 7;
+	}
+	provaz = dasync { "http://localhost:8080/RestService/", return somma(prova6,prova1) };
+	println(provaz);
+}

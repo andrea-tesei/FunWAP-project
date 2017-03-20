@@ -1,0 +1,78 @@
+﻿{   
+module Lexer
+open System   
+open Parser   
+open Microsoft.FSharp.Text.Lexing
+ 
+let keywords =   
+    [   
+        "fun", FUN;   
+        "main", MAIN;
+        "for", FOR;
+        "async", ASYNC;   
+        "dasync", DASYNC;   
+        "return", RETURN;   
+        "println", PRINTLN;
+        "var", VAR;
+        "if", IF;
+        "then", THEN;
+        "else", ELSE;   
+    ] |> Map.ofList   
+ 
+let ops =   
+    [   
+        "==",   EQUALOP;
+        "=",    EQUALDEF;
+        "&&",   AND;
+        "||",   OR;
+        "!=",   DIFFER;
+        "!",    NOT;
+        "-",    MINUS;
+        "+",    PLUS;
+        "*",    TIMES;
+        "/",    DIVISION;
+        "<",    LOWER;   
+        "<=",   LOWEREQ;   
+        ">",    GREATER;   
+        ">=",   GREATEREQ;   
+    ] |> Map.ofList   
+ 
+  
+let types =
+    [
+        "bool",  TBOOL;
+        "int",  TINT;
+    ] |> Map.ofList
+
+}   
+ 
+let char        = ['a'-'z' 'A'-'Z']   
+let digit       = ['0'-'9']   
+let int         = digit+
+let bool        = "true" | "false"      
+let identifier  = char(char|digit|['-' '_' '.' '/' ':'])*   
+let whitespace  = [' ' '\t']   
+let newline     = ('\n' '\r' | '\n' | '\r')
+let operator    = ">" | ">=" | "<" | "<=" | "==" | "!=" | "!" | "*" | "+" | "-" | "/" | "&&" | "||" | "="
+let type        = "bool" | "int"
+ 
+rule tokenize = parse   
+| whitespace    { tokenize lexbuf }   
+| newline       { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf; }   
+| int           { INT(Int32.Parse(LexBuffer<_>.LexemeString lexbuf)) }
+| bool          { BOOL(Boolean.Parse(LexBuffer<_>.LexemeString lexbuf)) }      
+| operator      { ops.[LexBuffer<_>.LexemeString lexbuf] }   
+| type          { types.[LexBuffer<_>.LexemeString lexbuf] }
+| identifier    { match keywords.TryFind(LexBuffer<_>.LexemeString lexbuf) with   
+                  | Some(token) -> token   
+                  | None -> ID(LexBuffer<_>.LexemeString lexbuf) }
+| ','           { COMMA }
+| ';'           { SEMICOLON }
+| ')'           { RPAR }
+| '('           { LPAR }
+| '{'           { LBRACHET }
+| '}'           { RBRACHET }
+| '"'           { QUOTE }
+| "//" [^ '\n']* '\n' 
+                { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf; }
+| eof           { END }

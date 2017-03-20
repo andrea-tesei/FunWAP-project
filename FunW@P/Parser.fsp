@@ -1,0 +1,136 @@
+﻿%{   
+open Ast   
+%}   
+ 
+%token <string> ID   
+%token <int> INT   
+%token <bool> BOOL
+ 
+%token AND OR NOT  
+%token COMMA SEMICOLON RPAR LPAR RBRACHET LBRACHET QUOTE   
+%token EQUALOP DIFFER LOWER LOWEREQ GREATER GREATEREQ   
+%token MINUS PLUS TIMES DIVISION
+%token TINT TBOOL
+%token FUN MAIN FOR ASYNC DASYNC RETURN PRINTLN EQUALDEF VAR IF THEN ELSE
+%token END  
+ 
+// start   
+%start start   
+%type <AP.Ast.Prog> start   
+ 
+%%   
+
+start: Prog END { $1 }
+
+Prog: 
+      FUN MAIN LPAR RPAR Block { Prog{Fundecs = []; Main = $5} }
+    | Fundecs FUN MAIN LPAR RPAR Block  { Prog{Fundecs = $1; Main = $6} } 
+
+Params:
+      Type ID { [Param($2,$1)] }
+	| Params COMMA Type ID { $1 @ [Param($4,$3)] }
+
+Type:
+      TINT { TInt }
+    | TBOOL { TBool }
+    | FUN { TFun }
+
+Types:
+      Type { [$1] }
+    | Types COMMA Type { $1 @ [$3] }
+
+RType:
+      TINT { FInt }
+    | TBOOL { FBool }
+    | FUN LPAR Types RPAR RType { FFun($3,$5) }
+
+Decls:
+    | { [] }
+    | Decls Decl { $1 @ [$2] }
+
+Decl:
+      VAR ID Type EQUALDEF ADExp SEMICOLON { DecAssign($2,$3,$5) }
+    | VAR ID Type SEMICOLON { Dec($2,$3) }
+	
+Stmts:
+    | { [] }
+    | Stmts Stmt { $1 @ [$2] }
+
+Stmt:
+      ID EQUALDEF ADExp SEMICOLON { Assign($1,$3) }
+    | IF Bool THEN Block { IfThen($2,$4) }
+    | IF Bool THEN Block ELSE Block { IfThenElse($2,$4,$6) }
+    | FOR LPAR ID EQUALDEF Bool SEMICOLON Bool SEMICOLON ID EQUALDEF Bool RPAR Block { For{Init = Assign($3,$5); Cond = $7; Update = Assign($9,$11); Block = $13} }
+    | PRINTLN LPAR Bool RPAR SEMICOLON { Println($3) }
+
+ADExp:
+      Bool { $1 }
+    | ASYNC LBRACHET RETURN CFunc RBRACHET { Async($4) }
+    | DASYNC LBRACHET QUOTE ID QUOTE COMMA RETURN CFunc RBRACHET { DAsync($4,$8) }     
+
+Block:
+      LBRACHET Decls Stmts RBRACHET { Block($2,$3) }
+
+Retfun:
+      Bool { RetExpr($1) }
+    | FUN LPAR Params RPAR RType LBRACHET Decls Stmts RETURN Retfun SEMICOLON RBRACHET { AFun{Params = $3; TypeRet = $5; Block = Block($7,$8); Ret = $10} }
+
+Fundecs: 
+      FUN ID LPAR Params RPAR RType LBRACHET Decls Stmts RETURN Retfun SEMICOLON RBRACHET { [Fun{Name = $2; Params = $4; TypeRet = $6; Block = Block($8,$9); Ret = $11}] }
+	| Fundecs FUN ID LPAR Params RPAR RType LBRACHET Decls Stmts RETURN Retfun SEMICOLON RBRACHET { $1 @ [Fun{Name = $3; Params = $5; TypeRet = $7; Block = Block($9,$10); Ret = $12}] }
+
+Bool:
+    Bool OR Join { Or($1,$3) }
+  | Join { $1 }
+
+Join:
+    Join AND Equality { And($1,$3) }
+  | Equality { $1 }
+
+Equality:
+    Equality EQUALOP Rel { Equal($1, $3) }
+  | Equality DIFFER Rel { Differ($1,$3) }
+  | Rel { $1 }
+
+Rel:
+    Exp LOWER Exp { Lower($1,$3) }
+  | Exp LOWEREQ Exp { LowerEQ($1,$3) }
+  | Exp GREATER Exp { Greater($1,$3) }
+  | Exp GREATEREQ Exp { GreaterEQ($1,$3) }
+  | Exp { $1 }
+  
+Exp:
+    Exp PLUS Term { Sum($1,$3) }
+  | Exp MINUS Term { Sub($1,$3) }
+  | Term { $1 }
+  
+Term:
+    Term TIMES Unary { Prod($1,$3) }
+  | Term DIVISION Unary { Div($1,$3) }
+  | Unary { $1 }
+
+Unary:
+    NOT Unary { Not($2) }
+  | MINUS Unary { Minus($2) }
+  | Factor { $1 } 
+  
+Factor:
+    LPAR Bool RPAR { ParExp($2) }
+  | INT { Num($1) }
+  | BOOL { Boolean($1) }
+  | ID { Var($1) }
+  | CFunc { $1 }
+
+CFunc:
+  | ID LPAR CParams RPAR { Call($1,$3) }
+
+CParam:
+  | Bool { $1 }
+
+CParams:
+    CParam { [$1] }
+  | CParams COMMA CParam { $1 @ [$3] }
+
+
+
+%%
