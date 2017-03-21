@@ -17,10 +17,10 @@ fun main() {
 	var provaz int;
 	prova1 = prova1 + (-1) * (-4);
 	println(prova1);
-	prova1 = 1;
-	if(prova1 == 1) then {
-		prova6 = 7;
+	for(i = 0; i < 4; i=i+1){
+		prova6 = prova6 + 1;
 	}
-	provaz = dasync { "http://localhost:8080/RestService/", return somma(prova6,prova1) };
-	println(provaz);
+	println(prova6);
+	//provaz = dasync { "http://localhost:8080/RestService/", return somma(prova6,prova1) };
+	//println(provaz);
 }

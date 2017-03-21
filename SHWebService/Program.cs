@@ -1,12 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.ServiceModel.Description;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using FunWAPLib;
 
@@ -29,7 +25,7 @@ namespace CWebService
             Console.WriteLine("end deserialization");
             DeserializeDasyncRequest deserializer = new DeserializeDasyncRequest();
             Dictionary<string, object> funCall = deserializer.DeserializeRequest(json);
-            string ret = FunWap.start(funCall);
+            string ret = FunWap.InterpretFunction(funCall);
             string jsonRes = JsonConvert.SerializeObject(ret);
             return jsonRes;
         }
