@@ -86,12 +86,6 @@ fun fib (n int) int {
 }
 ```
 # How to execute the code
-You can either import the whole project in Visual Studio 2013+ or compile it by run:
-```
-TBD
-```
+You can execute the code in this repository by importing [this](https://github.com/andrea-tesei/FunWAP-project/blob/master/AP.sln) file in Visual Studio 2013+ and compile it solving all references by NuGet packages manager.
 You can find a piece of code used in test phase [here](https://github.com/andrea-tesei/FunWAP-project/blob/master/FunW%40P/testcode.txt).
-If you want to use the Dasync construct, you have first to deploy the WebService which you can find [here](https://github.com/andrea-tesei/FunWAP-project/tree/master/SHWebService), importing it in Visual Studio 2013+ or compiling it by run:
-```
-TBD
-```
+If you want to use the 'Dasync' construct, you have first to deploy the WebService which you can find [here](https://github.com/andrea-tesei/FunWAP-project/tree/master/SHWebService), importing it in Visual Studio 2013+ as usual and then compile it in an executable which you can run in order to deploy the web service needed to test the 'Dasync' construct.
